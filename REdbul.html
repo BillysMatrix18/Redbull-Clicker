@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Red Bull Clicker - Scrollable Upgrades</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: #0e1014;
+    color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
+    min-height: 100vh;
+  }
+
+  #app {
+    width: 900px;
+    max-width: 100%;
+    background: #181a1f;
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  header {
+    padding: 2rem 3rem;
+    background: #21242c;
+    border-bottom: 1px solid #2c2f3a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  header h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 2.5rem;
+    letter-spacing: 0.15em;
+    color: #f9423a;
+    text-transform: uppercase;
+  }
+
+  .stats {
+    display: flex;
+    gap: 2.5rem;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: #bbb;
+  }
+  .stats span {
+    background: #2a2e39;
+    padding: 0.5rem 1.5rem;
+    border-radius: 12px;
+    box-shadow:
+      inset 2px 2px 5px #17191f,
+      inset -2px -2px 5px #3b3f4a;
+  }
+
+  main {
+    display: flex;
+    gap: 2rem;
+    padding: 3rem;
+    background: #1c1f26;
+    height: 650px; /* fix height for scrolling layout */
+  }
+
+  #clicker-section {
+    flex: 1 1 350px;
+    background: #23262f;
+    border-radius: 16px;
+    box-shadow:
+      inset 3px 3px 6px #17191f,
+      inset -3px -3px 6px #2c2f3a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    padding: 3rem 2rem;
+  }
+
+  #can-count {
+    font-size: 5rem;
+    font-weight: 800;
+    color: #f9423a;
+    margin-bottom: 2rem;
+    letter-spacing: 0.02em;
+  }
+
+  #redbull-can {
+    width: 150px;
+    height: 350px;
+    background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Red_Bull_can_250ml.png/220px-Red_Bull_can_250ml.png') center/contain no-repeat;
+    border-radius: 48px / 96px;
+    cursor: pointer;
+    filter: drop-shadow(0 6px 4px #f9423a55);
+    transition: transform 0.1s ease;
+  }
+  #redbull-can:active {
+    transform: scale(0.9);
+  }
+
+  #cps-display {
+    margin-top: 1.5rem;
+    font-weight: 600;
+    font-size: 1.3rem;
+    color: #ff6b63;
+  }
+
+  #upgrades-section {
+    flex: 1 1 480px;
+    background: #22252f;
+    border-radius: 16px;
+    box-shadow:
+      inset 3px 3px 7px #17191f,
+      inset -3px -3px 7px #2c2f3a;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #upgrades-section h2 {
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #f9423a;
+    letter-spacing: 0.05em;
+  }
+
+  #upgrades-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 520px; /* fixed height to enable scroll */
+    padding-right: 8px;
+  }
+  #upgrades-list::-webkit-scrollbar {
+    width: 10px;
+  }
+  #upgrades-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  #upgrades-list::-webkit-scrollbar-thumb {
+    background-color: #f9423a;
+    border-radius: 8px;
+    border: 2px solid #1c1c1c;
+  }
+
+  .upgrade {
+    background: #292d38;
+    border-radius: 14px;
+    margin-bottom: 1.25rem;
+    padding: 1rem 1.5rem;
+    box-shadow:
+      4px 4px 6px #181a1f,
+      -4px -4px 6px #2d303c;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.25s ease, box-shadow 0.25s ease;
+  }
+  .upgrade:hover:not(.disabled) {
+    background: #f9423a;
+    color: #1c1c1c;
+    box-shadow:
+      0 0 12px 3px #f9423a99,
+      inset 0 0 12px 1px #f9423a99;
+  }
+  .upgrade.disabled {
+    opacity: 0.4;
+    cursor: default;
+    color: #888;
+    box-shadow: none !important;
+  }
+
+  .upgrade-info {
+    max-width: 70%;
+  }
+  .upgrade-name {
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 0.2rem;
+  }
+  .upgrade-desc {
+    font-size: 0.9rem;
+    color: #bbb;
+  }
+
+  .upgrade-cost {
+    font-weight: 700;
+    font-size: 1.2rem;
+    min-width: 90px;
+    text-align: right;
+    user-select: none;
+  }
+
+  .upgrade-count {
+    font-size: 0.85rem;
+    color: #ff6b63;
+    margin-top: 0.2rem;
+  }
+
+  footer {
+    padding: 1rem 0 3rem 0;
+    color: #555;
+    font-size: 0.9rem;
+    text-align: center;
+    user-select: none;
+  }
+
+  @media (max-width: 800px) {
+    main {
+      flex-direction: column;
+      padding: 2rem;
+      height: auto;
+    }
+    #upgrades-section, #clicker-section {
+      flex-basis: 100%;
+      margin-bottom: 2rem;
+    }
+    #upgrades-list {
+      max-height: 350px; /* smaller max height on mobile */
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="app" role="main" aria-label="Red Bull Clicker Game">
+  <header>
+    <h1>Red Bull Clicker</h1>
+    <div class="stats" aria-live="polite" aria-atomic="true">
+      <span>Cans: <strong id="total-cans">0</strong></span>
+      <span>CPS: <strong id="cps">0.00</strong></span>
+    </div>
+  </header>
+
+  <main>
+    <section id="clicker-section" aria-label="Click Red Bull can to produce cans">
+      <div id="can-count" aria-live="polite" aria-atomic="true">0</div>
+      <div id="redbull-can" role="button" tabindex="0" aria-pressed="false" aria-label="Click to produce Red Bull cans"></div>
+      <div id="cps-display">0 cans per second</div>
+    </section>
+
+    <section id="upgrades-section" aria-label="Upgrades Panel">
+      <h2>Upgrades</h2>
+      <div id="upgrades-list" role="list" tabindex="0" aria-label="List of upgrades"></div>
+    </section>
+  </main>
+
+  <footer>
+    Powered by Red Bull Energy &bull; Build your empire!
+  </footer>
+</div>
+
+<script>
+  let totalCans = 0;
+  let cps = 0;
+  let cansPerClick = 1;
+
+  const upgrades = [
+    { id: 'auto-filler', name: 'Auto Filler', description: 'Automatically produces 1 can per second.', baseCost: 50, cost: 50, cpsIncrease: 1, count: 0 },
+    { id: 'energy-multiplier', name: 'Energy Multiplier', description: 'Doubles cans produced per click.', baseCost: 100, cost: 100, cpsIncrease: 0, multiplier: 2, count: 0, type: 'clickMultiplier' },
+    { id: 'sponsor-deal', name: 'Sponsor Deal', description: 'Increases auto production by 5 cans per second.', baseCost: 800, cost: 800, cpsIncrease: 5, count: 0 },
+    { id: 'premium-can', name: 'Premium Can', description: 'Triples cans per click.', baseCost: 2000, cost: 2000, cpsIncrease: 0, multiplier: 3, count: 0, type: 'clickMultiplier' },
+    { id: 'viral-campaign', name: 'Viral Campaign', description: 'Adds 15 cans per second auto production.', baseCost: 10000, cost: 10000, cpsIncrease: 15, count: 0 },
+    { id: 'energy-lab', name: 'Energy Lab', description: 'Adds 25 cans per second.', baseCost: 30000, cost: 30000, cpsIncrease: 25, count: 0 },
+    { id: 'marketing-team', name: 'Marketing Team', description: 'Adds 40 cans per second.', baseCost: 60000, cost: 60000, cpsIncrease: 40, count: 0 },
+    { id: 'world-tour', name: 'World Tour', description: 'Adds 60 cans per second.', baseCost: 120000, cost: 120000, cpsIncrease: 60, count: 0 },
+    { id: 'robot-assembly', name: 'Robot Assembly', description: 'Adds 90 cans per second.', baseCost: 200000, cost: 200000, cpsIncrease: 90, count: 0 },
+    { id: 'ai-boost', name: 'AI Boost', description: 'Quadruples cans produced per click.', baseCost: 400000, cost: 400000, cpsIncrease: 0, multiplier: 4, count: 0, type: 'clickMultiplier' },
+    { id: 'energy-plant', name: 'Energy Plant', description: 'Adds 150 cans per second.', baseCost: 900000, cost: 900000, cpsIncrease: 150, count: 0 },
+    { id: 'streaming-partnership', name: 'Streaming Partnership', description: 'Adds 250 cans per second.', baseCost: 2000000, cost: 2000000, cpsIncrease: 250, count: 0 },
+    { id: 'luxury-can', name: 'Luxury Can', description: 'Quintuples cans per click.', baseCost: 4000000, cost: 4000000, cpsIncrease: 0, multiplier: 5, count: 0, type: 'clickMultiplier' },
+    { id: 'global-distribution', name: 'Global Distribution', description: 'Adds 400 cans per second.', baseCost: 9000000, cost: 9000000, cpsIncrease: 400, count: 0 },
+    { id: 'space-promotion', name: 'Space Promotion', description: 'Adds 600 cans per second.', baseCost: 15000000, cost: 15000000, cpsIncrease: 600, count: 0 },
+    { id: 'hologram-ad', name: 'Hologram Ad', description: 'Sextuples cans per click.', baseCost: 35000000, cost: 35000000, cpsIncrease: 0, multiplier: 6, count: 0, type: 'clickMultiplier' },
+    { id: 'neon-signs', name: 'Neon Signs', description: 'Adds 1000 cans per second.', baseCost: 75000000, cost: 75000000, cpsIncrease: 1000, count: 0 },
+    { id: 'virtual-reality', name: 'Virtual Reality', description: 'Adds 1500 cans per second.', baseCost: 120000000, cost: 120000000, cpsIncrease: 1500, count: 0 },
+    { id: 'energy-exosuit', name: 'Energy Exosuit', description: 'Septuples cans per click.', baseCost: 220000000, cost: 220000000, cpsIncrease: 0, multiplier: 7, count: 0, type: 'clickMultiplier' },
+    { id: 'quantum-factory', name: 'Quantum Factory', description: 'Adds 2500 cans per second.', baseCost: 400000000, cost: 400000000, cpsIncrease: 2500, count: 0 }
+  ];
+
+  const totalCansDisplay = document.getElementById('total-cans');
+  const cpsDisplay = document.getElementById('cps');
+  const canCountDisplay = document.getElementById('can-count');
+  const redBullCan = document.getElementById('redbull-can');
+  const upgradesList = document.getElementById('upgrades-list');
+  const cpsTextDisplay = document.getElementById('cps-display');
+
+  function calculateCps() {
+    let totalCps = 0;
+    let multiplier = 1;
+    upgrades.forEach(upg => {
+      if (upg.cpsIncrease) totalCps += upg.cpsIncrease * upg.count;
+      if (upg.type === 'clickMultiplier') {
+        multiplier *= Math.pow(upg.multiplier, upg.count);
+      }
+    });
+    cps = totalCps;
+    cansPerClick = multiplier;
+  }
+
+  function updateDisplays() {
+    totalCansDisplay.textContent = formatNumber(totalCans);
+    cpsDisplay.textContent = cps.toFixed(2);
+    canCountDisplay.textContent = formatNumber(Math.floor(totalCans));
+    cpsTextDisplay.textContent = `${cps.toFixed(2)} cans per second`;
+
+    upgrades.forEach(upg => {
+      const upgElem = document.getElementById(`upgrade-${upg.id}`);
+      if (!upgElem) return;
+      if (totalCans >= upg.cost) {
+        upgElem.classList.remove('disabled');
+      } else {
+        upgElem.classList.add('disabled');
+      }
+      const costElem = upgElem.querySelector('.upgrade-cost');
+      costElem.textContent = formatNumber(upg.cost);
+      const countElem = upgElem.querySelector('.upgrade-count');
+      countElem.textContent = `Owned: ${upg.count}`;
+    });
+  }
+
+  function formatNumber(num) {
+    if (num < 1000) return num.toString();
+    if (num < 1e6) return (num / 1000).toFixed(1) + 'K';
+    if (num < 1e9) return (num / 1e6).toFixed(1) + 'M';
+    if (num < 1e12) return (num / 1e9).toFixed(1) + 'B';
+    return num.toExponential(2);
+  }
+
+  function buyUpgrade(id) {
+    const upg = upgrades.find(u => u.id === id);
+    if (!upg) return;
+    if (totalCans >= upg.cost) {
+      totalCans -= upg.cost;
+      upg.count++;
+      upg.cost = Math.floor(upg.baseCost * Math.pow(1.45, upg.count));
+      calculateCps();
+      updateDisplays();
+    }
+  }
+
+  redBullCan.addEventListener('click', () => {
+    totalCans += cansPerClick;
+    updateDisplays();
+  });
+
+  redBullCan.addEventListener('keydown', (e) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      totalCans += cansPerClick;
+      updateDisplays();
+    }
+  });
+
+  function createUpgradesUI() {
+    upgradesList.innerHTML = '';
+    upgrades.forEach(upg => {
+      const upgElem = document.createElement('div');
+      upgElem.className = 'upgrade disabled';
+      upgElem.id = `upgrade-${upg.id}`;
+      upgElem.setAttribute('role', 'listitem');
+      upgElem.tabIndex = 0;
+      upgElem.innerHTML = `
+        <div class="upgrade-info">
+          <div class="upgrade-name">${upg.name}</div>
+          <div class="upgrade-desc">${upg.description}</div>
+          <div class="upgrade-count" aria-live="polite" aria-atomic="true">Owned: 0</div>
+        </div>
+        <div class="upgrade-cost">${formatNumber(upg.cost)}</div>
+      `;
+      upgradesList.appendChild(upgElem);
+
+      upgElem.addEventListener('click', () => {
+        if (!upgElem.classList.contains('disabled')) {
+          buyUpgrade(upg.id);
+        }
+      });
+
+      upgElem.addEventListener('keydown', e => {
+        if ((e.key === 'Enter' || e.key === ' ') && !upgElem.classList.contains('disabled')) {
+          e.preventDefault();
+          buyUpgrade(upg.id);
+        }
+      });
+    });
+  }
+
+  function gameLoop() {
+    totalCans += cps / 10;
+    updateDisplays();
+  }
+
+  createUpgradesUI();
+  calculateCps();
+  updateDisplays();
+  setInterval(gameLoop, 100);
+</script>
+</body>
+</html>
