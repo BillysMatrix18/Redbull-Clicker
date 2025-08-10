@@ -476,7 +476,7 @@
   let totalCans = 0;
   let cansPerClick = 1;
 
-  const milestones = [100, 1000, 10000];
+  const milestones = [50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 500000, 1000000];
   let nextMilestoneIndex = 0;
 
   const upgrades = [
@@ -486,116 +486,156 @@
     { id: 'premium-can', name: 'Premium Can', description: 'Triples cans per click.', baseCost: 2000, cost: 2000, cpsIncrease: 0, multiplier: 3, count: 0, type: 'clickMultiplier' },
     { id: 'viral-campaign', name: 'Viral Campaign', description: 'Adds 20 cans per second auto production.', baseCost: 10000, cost: 10000, cpsIncrease: 20, count: 0 },
 
-    // New upgrades:
-    { id: 'soda-fountain', name: 'Soda Fountain', description: 'Adds 50 cans per second auto production.', baseCost: 50000, cost: 50000, cpsIncrease: 50, count: 0 },
-    { id: 'marketing-guru', name: 'Marketing Guru', description: 'Quadruples cans per click.', baseCost: 75000, cost: 75000, cpsIncrease: 0, multiplier: 4, count: 0, type: 'clickMultiplier' },
-    { id: 'factory-expansion', name: 'Factory Expansion', description: 'Adds 100 cans per second auto production.', baseCost: 200000, cost: 200000, cpsIncrease: 100, count: 0 },
-    { id: 'celebrity-endorsement', name: 'Celebrity Endorsement', description: 'Quintuples cans per click.', baseCost: 350000, cost: 350000, cpsIncrease: 0, multiplier: 5, count: 0, type: 'clickMultiplier' },
-    { id: 'hyperloop-delivery', name: 'Hyperloop Delivery', description: 'Adds 250 cans per second auto production.', baseCost: 1000000, cost: 1000000, cpsIncrease: 250, count: 0 },
-    { id: 'secret-recipe', name: 'Secret Recipe', description: 'Doubles all cans per click and doubles auto production.', baseCost: 3000000, cost: 3000000, cpsIncrease: 0, multiplier: 2, count: 0, type: 'clickMultiplier', specialDoubleCps: true },
-    { id: 'global-distribution', name: 'Global Distribution', description: 'Adds 1000 cans per second auto production.', baseCost: 10000000, cost: 10000000, cpsIncrease: 1000, count: 0 },
-    { id: 'robot-army', name: 'Robot Army', description: 'Adds 5000 cans per second auto production.', baseCost: 50000000, cost: 50000000, cpsIncrease: 5000, count: 0 }
+    { id: 'red-bull-factory', name: 'Red Bull Factory', description: 'Produces 50 cans per second automatically.', baseCost: 50000, cost: 50000, cpsIncrease: 50, count: 0 },
+    { id: 'marketing-expert', name: 'Marketing Expert', description: 'Quintuples cans per click.', baseCost: 100000, cost: 100000, cpsIncrease: 0, multiplier: 5, count: 0, type: 'clickMultiplier' },
+    { id: 'supply-chain-upgrade', name: 'Supply Chain Upgrade', description: 'Adds 100 cans per second auto production.', baseCost: 250000, cost: 250000, cpsIncrease: 100, count: 0 },
+    { id: 'global-sponsorship', name: 'Global Sponsorship', description: 'Decuples cans per click.', baseCost: 1000000, cost: 1000000, cpsIncrease: 0, multiplier: 10, count: 0, type: 'clickMultiplier' }
   ];
 
-  let cps = 0;
+  let cansPerSecond = 0;
+  let clickMultiplier = 1;
 
+  // DOM Elements
   const canCountEl = document.getElementById('can-count');
   const totalCansEl = document.getElementById('total-cans');
-  const redbullCan = document.getElementById('redbull-can');
-  const upgradesList = document.getElementById('upgrades-list');
+  const upgradesListEl = document.getElementById('upgrades-list');
   const milestoneSlider = document.getElementById('milestone-slider');
   const milestonePopup = document.getElementById('milestone-popup');
   const milestoneMessage = document.getElementById('milestone-message');
   const milestoneCloseBtn = document.getElementById('milestone-close-btn');
+  const redbullCan = document.getElementById('redbull-can');
   const resetBtn = document.getElementById('reset-btn');
   const themeToggleBtn = document.getElementById('theme-toggle');
+  const milestoneSliderContainer = document.getElementById('milestone-slider-container');
 
-  // Calculate CPS and click multiplier with support for special upgrades
+  // --- Confetti setup ---
+  const confettiCanvas = document.getElementById('confetti-canvas');
+  const ctx = confettiCanvas.getContext('2d');
+  let confettiParticles = [];
+  let confettiActive = false;
+
+  function setupConfettiCanvas() {
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', setupConfettiCanvas);
+  setupConfettiCanvas();
+
+  class ConfettiParticle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.size = Math.random() * 7 + 4;
+      this.color = `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`;
+      this.speedX = (Math.random() - 0.5) * 10;
+      this.speedY = Math.random() * -10 - 5;
+      this.gravity = 0.3;
+      this.rotation = Math.random() * 360;
+      this.rotationSpeed = (Math.random() - 0.5) * 10;
+      this.opacity = 1;
+      this.life = 100;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      this.speedY += this.gravity;
+      this.rotation += this.rotationSpeed;
+      this.life--;
+      this.opacity = Math.max(this.life / 100, 0);
+    }
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate((this.rotation * Math.PI) / 180);
+      ctx.fillStyle = this.color;
+      ctx.globalAlpha = this.opacity;
+      ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+      ctx.restore();
+    }
+  }
+
+  function startConfetti() {
+    confettiActive = true;
+    for (let i = 0; i < 150; i++) {
+      confettiParticles.push(new ConfettiParticle(window.innerWidth / 2, window.innerHeight / 2));
+    }
+    requestAnimationFrame(confettiLoop);
+  }
+
+  function confettiLoop() {
+    if (!confettiActive) return;
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    confettiParticles.forEach((p, idx) => {
+      p.update();
+      p.draw();
+      if (p.life <= 0) confettiParticles.splice(idx, 1);
+    });
+    if (confettiParticles.length > 0) {
+      requestAnimationFrame(confettiLoop);
+    } else {
+      confettiActive = false;
+    }
+  }
+
+  // --- Game Logic ---
+
   function calculateCps() {
-    let totalCps = 0;
-    let multiplier = 1;
-    let secretRecipeCount = 0;
-    upgrades.forEach(upg => {
-      if (upg.cpsIncrease) totalCps += upg.cpsIncrease * upg.count;
-      if (upg.type === 'clickMultiplier') {
-        multiplier *= Math.pow(upg.multiplier, upg.count);
-      }
-      if (upg.specialDoubleCps) {
-        secretRecipeCount += upg.count;
+    cansPerSecond = upgrades.reduce((acc, upg) => acc + upg.cpsIncrease * upg.count, 0);
+    clickMultiplier = 1;
+    upgrades.forEach(u => {
+      if (u.type === 'clickMultiplier') {
+        clickMultiplier *= Math.pow(u.multiplier, u.count);
       }
     });
-    // If Secret Recipe purchased, double cps and click multiplier for each count
-    if (secretRecipeCount > 0) {
-      totalCps *= Math.pow(2, secretRecipeCount);
-      multiplier *= Math.pow(2, secretRecipeCount);
-    }
-    cps = totalCps;
-    cansPerClick = multiplier;
   }
 
   function updateUI() {
     canCountEl.textContent = totalCans.toLocaleString();
     totalCansEl.textContent = totalCans.toLocaleString();
 
-    // Update milestone progress
+    // Update milestone slider
     if (nextMilestoneIndex < milestones.length) {
       const currentMilestone = milestones[nextMilestoneIndex];
-      const progress = Math.min(totalCans / currentMilestone, 1);
+      const prevMilestone = nextMilestoneIndex > 0 ? milestones[nextMilestoneIndex - 1] : 0;
+      let progress = (totalCans - prevMilestone) / (currentMilestone - prevMilestone);
+      progress = Math.min(Math.max(progress, 0), 1);
       milestoneSlider.style.width = (progress * 100) + '%';
-      milestoneSlider.parentElement.setAttribute('aria-valuenow', Math.floor(progress * 100));
+      milestoneSliderContainer.setAttribute('aria-valuenow', Math.floor(progress * 100));
+      milestoneSliderContainer.setAttribute('aria-valuetext', `Progress to milestone ${currentMilestone}: ${Math.floor(progress * 100)}%`);
     } else {
       milestoneSlider.style.width = '100%';
-      milestoneSlider.parentElement.setAttribute('aria-valuenow', 100);
+      milestoneSliderContainer.setAttribute('aria-valuenow', 100);
+      milestoneSliderContainer.setAttribute('aria-valuetext', `All milestones completed`);
     }
 
     // Update upgrades list
-    upgradesList.innerHTML = '';
+    upgradesListEl.innerHTML = '';
     upgrades.forEach(upg => {
-      const canAfford = totalCans >= upg.cost;
-      const upgradeDiv = document.createElement('div');
-      upgradeDiv.className = 'upgrade' + (canAfford ? '' : ' disabled');
-      upgradeDiv.setAttribute('role', 'listitem');
-      upgradeDiv.tabIndex = canAfford ? 0 : -1;
-      upgradeDiv.setAttribute('aria-label', `${upg.name}, ${upg.description}, Cost: ${upg.cost.toLocaleString()} cans. Owned: ${upg.count}. ${canAfford ? 'Press Enter to buy.' : 'Not enough cans.'}`);
+      const disabled = totalCans < upg.cost;
+      const upgradeEl = document.createElement('div');
+      upgradeEl.className = 'upgrade' + (disabled ? ' disabled' : '');
+      upgradeEl.setAttribute('role', 'listitem');
+      upgradeEl.setAttribute('tabindex', disabled ? '-1' : '0');
+      upgradeEl.setAttribute('aria-disabled', disabled.toString());
 
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'upgrade-info';
-
-      const nameDiv = document.createElement('div');
-      nameDiv.className = 'upgrade-name';
-      nameDiv.textContent = upg.name;
-      infoDiv.appendChild(nameDiv);
-
-      const descDiv = document.createElement('div');
-      descDiv.className = 'upgrade-desc';
-      descDiv.textContent = upg.description;
-      infoDiv.appendChild(descDiv);
-
-      if (upg.count > 0) {
-        const countDiv = document.createElement('div');
-        countDiv.className = 'upgrade-count';
-        countDiv.textContent = `Owned: ${upg.count}`;
-        infoDiv.appendChild(countDiv);
-      }
-
-      upgradeDiv.appendChild(infoDiv);
-
-      const costDiv = document.createElement('div');
-      costDiv.className = 'upgrade-cost';
-      costDiv.textContent = upg.cost.toLocaleString();
-      upgradeDiv.appendChild(costDiv);
-
-      if (canAfford) {
-        upgradeDiv.addEventListener('click', () => buyUpgrade(upg.id));
-        upgradeDiv.addEventListener('keydown', e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            buyUpgrade(upg.id);
-          }
-        });
-      }
-
-      upgradesList.appendChild(upgradeDiv);
+      upgradeEl.innerHTML = `
+        <div class="upgrade-info">
+          <div class="upgrade-name">${upg.name}</div>
+          <div class="upgrade-desc">${upg.description}</div>
+          <div class="upgrade-count">Owned: ${upg.count}</div>
+        </div>
+        <div class="upgrade-cost">${upg.cost.toLocaleString()}</div>
+      `;
+      upgradeEl.addEventListener('click', () => {
+        if (!disabled) buyUpgrade(upg.id);
+      });
+      upgradeEl.addEventListener('keydown', (e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
+          e.preventDefault();
+          buyUpgrade(upg.id);
+        }
+      });
+      upgradesListEl.appendChild(upgradeEl);
     });
   }
 
@@ -605,170 +645,91 @@
     if (totalCans >= upg.cost) {
       totalCans -= upg.cost;
       upg.count++;
-      upg.cost = Math.floor(upg.baseCost * Math.pow(1.15, upg.count));
+      // Increase cost by 25% per purchase (faster growth)
+      upg.cost = Math.floor(upg.baseCost * Math.pow(1.25, upg.count));
       calculateCps();
       updateUI();
     }
   }
 
+  // Click handler on can
+  redbullCan.addEventListener('click', () => {
+    totalCans += cansPerClick * clickMultiplier;
+    checkMilestones();
+    updateUI();
+  });
+  redbullCan.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      totalCans += cansPerClick * clickMultiplier;
+      checkMilestones();
+      updateUI();
+    }
+  });
+
+  // Auto increment cans every second
+  setInterval(() => {
+    if (cansPerSecond > 0) {
+      totalCans += cansPerSecond;
+      checkMilestones();
+      updateUI();
+    }
+  }, 1000);
+
+  // Milestone check & popup
   function checkMilestones() {
     if (nextMilestoneIndex >= milestones.length) return;
-    const milestone = milestones[nextMilestoneIndex];
-    if (totalCans >= milestone) {
-      showMilestonePopup(milestone);
+    if (totalCans >= milestones[nextMilestoneIndex]) {
+      showMilestone(milestones[nextMilestoneIndex]);
       nextMilestoneIndex++;
     }
   }
 
-  function showMilestonePopup(milestone) {
-    milestoneMessage.textContent = `Congrats! You reached ${milestone.toLocaleString()} cans!`;
+  function showMilestone(value) {
+    milestoneMessage.textContent = `Milestone reached: ${value.toLocaleString()} cans! 🎉`;
     milestonePopup.classList.add('show');
     milestonePopup.focus();
-    triggerConfetti();
+    startConfetti();
   }
 
-  function closeMilestonePopup() {
+  milestoneCloseBtn.addEventListener('click', () => {
     milestonePopup.classList.remove('show');
-    redbullCan.focus();
-  }
-
-  // Increment cans automatically each second
-  setInterval(() => {
-    totalCans += cps;
-    updateUI();
-    checkMilestones();
-  }, 1000);
-
-  // Click to produce cans
-  redbullCan.addEventListener('click', () => {
-    totalCans += cansPerClick;
-    updateUI();
-    checkMilestones();
   });
-  redbullCan.addEventListener('keydown', e => {
+  milestoneCloseBtn.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      totalCans += cansPerClick;
-      updateUI();
-      checkMilestones();
+      milestonePopup.classList.remove('show');
+      redbullCan.focus();
     }
   });
 
-  milestoneCloseBtn.addEventListener('click', closeMilestonePopup);
-  milestoneCloseBtn.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      closeMilestonePopup();
-    }
-  });
-
+  // Reset game
   resetBtn.addEventListener('click', () => {
-    if (confirm('Are you sure you want to reset your progress?')) {
+    if (confirm('Are you sure you want to reset your game progress?')) {
       totalCans = 0;
-      nextMilestoneIndex = 0;
       upgrades.forEach(u => {
         u.count = 0;
         u.cost = u.baseCost;
       });
+      nextMilestoneIndex = 0;
       calculateCps();
       updateUI();
     }
   });
 
   // Theme toggle
-  function updateThemeUI() {
-    if (document.body.classList.contains('light')) {
-      themeToggleBtn.textContent = 'Dark Mode';
-      themeToggleBtn.setAttribute('aria-label', 'Switch to dark mode');
-    } else {
-      themeToggleBtn.textContent = 'Light Mode';
-      themeToggleBtn.setAttribute('aria-label', 'Switch to light mode');
-    }
-  }
   themeToggleBtn.addEventListener('click', () => {
     document.body.classList.toggle('light');
-    updateThemeUI();
+    if (document.body.classList.contains('light')) {
+      themeToggleBtn.textContent = 'Dark Mode';
+    } else {
+      themeToggleBtn.textContent = 'Light Mode';
+    }
   });
 
-  // Initial calculations and UI update
+  // Initial UI setup
   calculateCps();
   updateUI();
-  updateThemeUI();
-
-  // Confetti effect for milestones
-  // Simple confetti animation adapted from canvas-confetti for performance & simplicity
-  const confettiCanvas = document.getElementById('confetti-canvas');
-  const ctx = confettiCanvas.getContext('2d');
-  let confettiPieces = [];
-
-  function resizeCanvas() {
-    confettiCanvas.width = window.innerWidth;
-    confettiCanvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-
-  class ConfettiPiece {
-    constructor() {
-      this.x = Math.random() * confettiCanvas.width;
-      this.y = Math.random() * -confettiCanvas.height;
-      this.size = (Math.random() * 7) + 7;
-      this.speed = (Math.random() * 3) + 3;
-      this.angle = Math.random() * 2 * Math.PI;
-      this.spin = (Math.random() * 0.1) + 0.05;
-      this.color = `hsl(${Math.floor(Math.random() * 360)}, 100%, 65%)`;
-      this.tilt = Math.random() * 15;
-      this.tiltAngle = 0;
-      this.tiltSpeed = (Math.random() * 0.1) + 0.05;
-    }
-    update() {
-      this.y += this.speed;
-      this.tiltAngle += this.tiltSpeed;
-      this.tilt = Math.sin(this.tiltAngle) * 15;
-      if (this.y > confettiCanvas.height) {
-        this.x = Math.random() * confettiCanvas.width;
-        this.y = -this.size;
-      }
-    }
-    draw() {
-      ctx.beginPath();
-      ctx.lineWidth = this.size / 2;
-      ctx.strokeStyle = this.color;
-      ctx.moveTo(this.x + this.tilt + this.size / 4, this.y);
-      ctx.lineTo(this.x + this.tilt, this.y + this.tilt + this.size / 4);
-      ctx.stroke();
-    }
-  }
-
-  function createConfetti(num) {
-    confettiPieces = [];
-    for (let i = 0; i < num; i++) {
-      confettiPieces.push(new ConfettiPiece());
-    }
-  }
-
-  let confettiRunning = false;
-
-  function runConfetti() {
-    if (!confettiRunning) return;
-    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-    confettiPieces.forEach(p => {
-      p.update();
-      p.draw();
-    });
-    requestAnimationFrame(runConfetti);
-  }
-
-  function triggerConfetti() {
-    if (confettiRunning) return;
-    confettiRunning = true;
-    createConfetti(150);
-    runConfetti();
-    setTimeout(() => {
-      confettiRunning = false;
-      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-    }, 5000);
-  }
 </script>
 
 </body>
