@@ -308,7 +308,7 @@
   }
 
   function updateDisplays() {
-    totalCansDisplay.textContent = formatNumber(totalCans);
+    totalCansDisplay.textContent = formatNumber(Math.round(totalCans));
     cpsDisplay.textContent = cps.toFixed(2);
     canCountDisplay.textContent = formatNumber(Math.floor(totalCans));
     cpsTextDisplay.textContent = `${cps.toFixed(2)} cans per second`;
