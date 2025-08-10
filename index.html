@@ -3,56 +3,105 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Red Bull Clicker - Scrollable Upgrades</title>
+<title>Red Bull Clicker - Billy Papastavros Edition</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+  :root {
+    --bg-dark: #0e1014;
+    --bg-light: #f9f9f9;
+    --text-dark: #e0e0e0;
+    --text-light: #1c1c1c;
+    --red: #f9423a;
+    --red-light: #ff6b63;
+    --gray-dark: #181a1f;
+    --gray-light: #ddd;
+  }
 
   body {
     margin: 0;
     font-family: 'Inter', sans-serif;
-    background: #0e1014;
-    color: #e0e0e0;
+    background: var(--bg-dark);
+    color: var(--text-dark);
     display: flex;
     justify-content: center;
-    padding: 2rem 1rem;
+    padding: 2rem 1rem 4rem;
     min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+  body.light {
+    background: var(--bg-light);
+    color: var(--text-light);
   }
 
   #app {
     width: 900px;
     max-width: 100%;
-    background: #181a1f;
+    background: var(--gray-dark);
     border-radius: 16px;
     box-shadow: 0 16px 48px rgba(0,0,0,0.7);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+  body.light #app {
+    background: #fff;
+    color: var(--text-light);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
   }
 
   header {
-    padding: 2rem 3rem;
-    background: #21242c;
+    position: sticky;
+    top: 0;
+    background: var(--gray-dark);
     border-bottom: 1px solid #2c2f3a;
+    padding: 1rem 3rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    z-index: 10;
+    transition: background 0.3s;
+  }
+  body.light header {
+    background: #eee;
+    border-color: #ccc;
   }
 
-  header h1 {
+  /* Updated title styling */
+  #title-container {
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+  }
+  #title-container h1 {
+    font-weight: 900;
+    font-size: 3rem;
+    color: var(--red);
     margin: 0;
-    font-weight: 700;
-    font-size: 2.5rem;
-    letter-spacing: 0.15em;
-    color: #f9423a;
-    text-transform: uppercase;
+  }
+  #title-container small {
+    font-weight: 500;
+    font-size: 1rem;
+    color: #bbb;
+    margin-top: 0.2rem;
+    user-select: none;
+  }
+  body.light #title-container small {
+    color: #777;
   }
 
   .stats {
     display: flex;
     gap: 2.5rem;
     font-weight: 600;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     color: #bbb;
+    justify-content: center;
+    margin-top: 0.7rem;
+  }
+  body.light .stats {
+    color: #666;
   }
   .stats span {
     background: #2a2e39;
@@ -61,14 +110,42 @@
     box-shadow:
       inset 2px 2px 5px #17191f,
       inset -2px -2px 5px #3b3f4a;
+    user-select: none;
+  }
+  body.light .stats span {
+    background: #eee;
+    box-shadow:
+      inset 2px 2px 5px #ccc,
+      inset -2px -2px 5px #fff;
+  }
+
+  #milestone-slider-container {
+    margin: 0 3rem 2.5rem 3rem; /* moved slider lower with bigger bottom margin */
+    height: 16px;
+    background: #2a2e39;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  body.light #milestone-slider-container {
+    background: #eee;
+  }
+  #milestone-slider {
+    height: 100%;
+    background: var(--red);
+    width: 0%;
+    transition: width 0.3s ease;
   }
 
   main {
     display: flex;
     gap: 2rem;
     padding: 3rem;
-    background: #1c1f26;
-    height: 650px; /* fix height for scrolling layout */
+    background: var(--gray-dark);
+    height: 650px;
+    transition: background 0.3s;
+  }
+  body.light main {
+    background: #fafafa;
   }
 
   #clicker-section {
@@ -83,14 +160,27 @@
     align-items: center;
     user-select: none;
     padding: 3rem 2rem;
+    position: relative;
+    transition: background 0.3s;
+  }
+  body.light #clicker-section {
+    background: #fff;
+    box-shadow:
+      inset 3px 3px 6px #ccc,
+      inset -3px -3px 6px #eee;
+    color: var(--text-light);
   }
 
   #can-count {
     font-size: 5rem;
     font-weight: 800;
-    color: #f9423a;
+    color: var(--red);
     margin-bottom: 2rem;
     letter-spacing: 0.02em;
+    user-select: text;
+  }
+  body.light #can-count {
+    color: #d12f2f;
   }
 
   #redbull-can {
@@ -106,13 +196,6 @@
     transform: scale(0.9);
   }
 
-  #cps-display {
-    margin-top: 1.5rem;
-    font-weight: 600;
-    font-size: 1.3rem;
-    color: #ff6b63;
-  }
-
   #upgrades-section {
     flex: 1 1 480px;
     background: #22252f;
@@ -123,20 +206,29 @@
     padding: 2.5rem 2rem;
     display: flex;
     flex-direction: column;
+    transition: background 0.3s;
+  }
+  body.light #upgrades-section {
+    background: #fff;
+    box-shadow:
+      inset 3px 3px 7px #ccc,
+      inset -3px -3px 7px #eee;
+    color: var(--text-light);
   }
 
   #upgrades-section h2 {
     font-weight: 700;
     font-size: 2rem;
     margin-bottom: 1.5rem;
-    color: #f9423a;
+    color: var(--red);
     letter-spacing: 0.05em;
+    user-select: none;
   }
 
   #upgrades-list {
     flex-grow: 1;
     overflow-y: auto;
-    max-height: 520px; /* fixed height to enable scroll */
+    max-height: 520px;
     padding-right: 8px;
   }
   #upgrades-list::-webkit-scrollbar {
@@ -146,9 +238,12 @@
     background: transparent;
   }
   #upgrades-list::-webkit-scrollbar-thumb {
-    background-color: #f9423a;
+    background-color: var(--red);
     border-radius: 8px;
     border: 2px solid #1c1c1c;
+  }
+  body.light #upgrades-list::-webkit-scrollbar-thumb {
+    border: 2px solid #fff;
   }
 
   .upgrade {
@@ -163,10 +258,11 @@
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    transition: background 0.25s ease, box-shadow 0.25s ease;
+    transition: background 0.25s ease, box-shadow 0.25s ease, color 0.3s;
+    position: relative;
   }
   .upgrade:hover:not(.disabled) {
-    background: #f9423a;
+    background: var(--red);
     color: #1c1c1c;
     box-shadow:
       0 0 12px 3px #f9423a99,
@@ -177,6 +273,17 @@
     cursor: default;
     color: #888;
     box-shadow: none !important;
+  }
+  body.light .upgrade {
+    background: #f4f4f4;
+    color: var(--text-light);
+  }
+  body.light .upgrade.disabled {
+    color: #aaa;
+  }
+  body.light .upgrade:hover:not(.disabled) {
+    background: #ff6b63;
+    color: #1c1c1c;
   }
 
   .upgrade-info {
@@ -191,6 +298,9 @@
     font-size: 0.9rem;
     color: #bbb;
   }
+  body.light .upgrade-desc {
+    color: #666;
+  }
 
   .upgrade-cost {
     font-weight: 700;
@@ -202,8 +312,12 @@
 
   .upgrade-count {
     font-size: 0.85rem;
-    color: #ff6b63;
+    color: var(--red-light);
     margin-top: 0.2rem;
+    user-select: none;
+  }
+  body.light .upgrade-count {
+    color: #ff3b3b;
   }
 
   footer {
@@ -213,7 +327,89 @@
     text-align: center;
     user-select: none;
   }
+  body.light footer {
+    color: #999;
+  }
 
+  #milestone-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: var(--red);
+    color: #fff;
+    border-radius: 16px;
+    padding: 2rem 3rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 0 30px #f9423acc;
+    user-select: none;
+    pointer-events: none;
+    z-index: 1000;
+    transition: transform 0.3s ease-out;
+  }
+  #milestone-popup.show {
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+  }
+
+  #milestone-popup button {
+    margin-top: 1.5rem;
+    background: #fff;
+    color: var(--red);
+    border: none;
+    border-radius: 12px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  #milestone-popup button:hover {
+    background: #f0f0f0;
+  }
+
+  /* Confetti canvas */
+  #confetti-canvas {
+    position: fixed;
+    pointer-events: none;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1050;
+  }
+
+  /* Controls below header */
+  #controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  button {
+    background: var(--red);
+    border: none;
+    border-radius: 10px;
+    color: #1c1c1c;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    font-size: 1rem;
+    user-select: none;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #ff6b63;
+  }
+  body.light button {
+    background: #ff6b63;
+    color: #1c1c1c;
+  }
+  body.light button:hover {
+    background: var(--red);
+  }
+
+  /* Responsive tweaks */
   @media (max-width: 800px) {
     main {
       flex-direction: column;
@@ -225,7 +421,7 @@
       margin-bottom: 2rem;
     }
     #upgrades-list {
-      max-height: 350px; /* smaller max height on mobile */
+      max-height: 350px;
     }
   }
 </style>
@@ -234,18 +430,28 @@
 
 <div id="app" role="main" aria-label="Red Bull Clicker Game">
   <header>
-    <h1>Red Bull Clicker</h1>
-    <div class="stats" aria-live="polite" aria-atomic="true">
-      <span>Cans: <strong id="total-cans">0</strong></span>
-      <span>CPS: <strong id="cps">0.00</strong></span>
+    <div id="title-container" style="display:flex; flex-direction: column; user-select:none;">
+      <h1 style="font-weight: 900; font-size: 3rem; color: var(--red); margin: 0;">RedBull Clicker</h1>
+      <small style="font-weight: 500; font-size: 1rem; color: #bbb; margin-top: 0.2rem; user-select:none;">by Billy Papastavros</small>
+    </div>
+    <div id="controls" role="region" aria-label="Game controls">
+      <button id="reset-btn" aria-label="Reset game">Reset</button>
+      <button id="theme-toggle" aria-label="Toggle light or dark mode">Light Mode</button>
     </div>
   </header>
+
+  <div class="stats" aria-live="polite" aria-atomic="true" style="justify-content:center; margin-top: 0.7rem;">
+    <span>Cans: <strong id="total-cans">0</strong></span>
+  </div>
+
+  <div id="milestone-slider-container" aria-label="Milestone progress slider" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div id="milestone-slider"></div>
+  </div>
 
   <main>
     <section id="clicker-section" aria-label="Click Red Bull can to produce cans">
       <div id="can-count" aria-live="polite" aria-atomic="true">0</div>
       <div id="redbull-can" role="button" tabindex="0" aria-pressed="false" aria-label="Click to produce Red Bull cans"></div>
-      <div id="cps-display">0 cans per second</div>
     </section>
 
     <section id="upgrades-section" aria-label="Upgrades Panel">
@@ -259,81 +465,138 @@
   </footer>
 </div>
 
+<div id="milestone-popup" role="dialog" aria-modal="true" aria-labelledby="milestone-message" aria-describedby="milestone-desc" tabindex="-1">
+  <div id="milestone-message"></div>
+  <button id="milestone-close-btn" aria-label="Close milestone popup">Close</button>
+</div>
+
+<canvas id="confetti-canvas"></canvas>
+
 <script>
   let totalCans = 0;
-  let cps = 0;
   let cansPerClick = 1;
+
+  const milestones = [100, 1000, 10000];
+  let nextMilestoneIndex = 0;
 
   const upgrades = [
     { id: 'auto-filler', name: 'Auto Filler', description: 'Automatically produces 1 can per second.', baseCost: 50, cost: 50, cpsIncrease: 1, count: 0 },
     { id: 'energy-multiplier', name: 'Energy Multiplier', description: 'Doubles cans produced per click.', baseCost: 100, cost: 100, cpsIncrease: 0, multiplier: 2, count: 0, type: 'clickMultiplier' },
     { id: 'sponsor-deal', name: 'Sponsor Deal', description: 'Increases auto production by 5 cans per second.', baseCost: 800, cost: 800, cpsIncrease: 5, count: 0 },
     { id: 'premium-can', name: 'Premium Can', description: 'Triples cans per click.', baseCost: 2000, cost: 2000, cpsIncrease: 0, multiplier: 3, count: 0, type: 'clickMultiplier' },
-    { id: 'viral-campaign', name: 'Viral Campaign', description: 'Adds 15 cans per second auto production.', baseCost: 10000, cost: 10000, cpsIncrease: 15, count: 0 },
-    { id: 'energy-lab', name: 'Energy Lab', description: 'Adds 25 cans per second.', baseCost: 30000, cost: 30000, cpsIncrease: 25, count: 0 },
-    { id: 'marketing-team', name: 'Marketing Team', description: 'Adds 40 cans per second.', baseCost: 60000, cost: 60000, cpsIncrease: 40, count: 0 },
-    { id: 'world-tour', name: 'World Tour', description: 'Adds 60 cans per second.', baseCost: 120000, cost: 120000, cpsIncrease: 60, count: 0 },
-    { id: 'robot-assembly', name: 'Robot Assembly', description: 'Adds 90 cans per second.', baseCost: 200000, cost: 200000, cpsIncrease: 90, count: 0 },
-    { id: 'ai-boost', name: 'AI Boost', description: 'Quadruples cans produced per click.', baseCost: 400000, cost: 400000, cpsIncrease: 0, multiplier: 4, count: 0, type: 'clickMultiplier' },
-    { id: 'energy-plant', name: 'Energy Plant', description: 'Adds 150 cans per second.', baseCost: 900000, cost: 900000, cpsIncrease: 150, count: 0 },
-    { id: 'streaming-partnership', name: 'Streaming Partnership', description: 'Adds 250 cans per second.', baseCost: 2000000, cost: 2000000, cpsIncrease: 250, count: 0 },
-    { id: 'luxury-can', name: 'Luxury Can', description: 'Quintuples cans per click.', baseCost: 4000000, cost: 4000000, cpsIncrease: 0, multiplier: 5, count: 0, type: 'clickMultiplier' },
-    { id: 'global-distribution', name: 'Global Distribution', description: 'Adds 400 cans per second.', baseCost: 9000000, cost: 9000000, cpsIncrease: 400, count: 0 },
-    { id: 'space-promotion', name: 'Space Promotion', description: 'Adds 600 cans per second.', baseCost: 15000000, cost: 15000000, cpsIncrease: 600, count: 0 },
-    { id: 'hologram-ad', name: 'Hologram Ad', description: 'Sextuples cans per click.', baseCost: 35000000, cost: 35000000, cpsIncrease: 0, multiplier: 6, count: 0, type: 'clickMultiplier' },
-    { id: 'neon-signs', name: 'Neon Signs', description: 'Adds 1000 cans per second.', baseCost: 75000000, cost: 75000000, cpsIncrease: 1000, count: 0 },
-    { id: 'virtual-reality', name: 'Virtual Reality', description: 'Adds 1500 cans per second.', baseCost: 120000000, cost: 120000000, cpsIncrease: 1500, count: 0 },
-    { id: 'energy-exosuit', name: 'Energy Exosuit', description: 'Septuples cans per click.', baseCost: 220000000, cost: 220000000, cpsIncrease: 0, multiplier: 7, count: 0, type: 'clickMultiplier' },
-    { id: 'quantum-factory', name: 'Quantum Factory', description: 'Adds 2500 cans per second.', baseCost: 400000000, cost: 400000000, cpsIncrease: 2500, count: 0 }
+    { id: 'viral-campaign', name: 'Viral Campaign', description: 'Adds 20 cans per second auto production.', baseCost: 10000, cost: 10000, cpsIncrease: 20, count: 0 },
+
+    // New upgrades:
+    { id: 'soda-fountain', name: 'Soda Fountain', description: 'Adds 50 cans per second auto production.', baseCost: 50000, cost: 50000, cpsIncrease: 50, count: 0 },
+    { id: 'marketing-guru', name: 'Marketing Guru', description: 'Quadruples cans per click.', baseCost: 75000, cost: 75000, cpsIncrease: 0, multiplier: 4, count: 0, type: 'clickMultiplier' },
+    { id: 'factory-expansion', name: 'Factory Expansion', description: 'Adds 100 cans per second auto production.', baseCost: 200000, cost: 200000, cpsIncrease: 100, count: 0 },
+    { id: 'celebrity-endorsement', name: 'Celebrity Endorsement', description: 'Quintuples cans per click.', baseCost: 350000, cost: 350000, cpsIncrease: 0, multiplier: 5, count: 0, type: 'clickMultiplier' },
+    { id: 'hyperloop-delivery', name: 'Hyperloop Delivery', description: 'Adds 250 cans per second auto production.', baseCost: 1000000, cost: 1000000, cpsIncrease: 250, count: 0 },
+    { id: 'secret-recipe', name: 'Secret Recipe', description: 'Doubles all cans per click and doubles auto production.', baseCost: 3000000, cost: 3000000, cpsIncrease: 0, multiplier: 2, count: 0, type: 'clickMultiplier', specialDoubleCps: true },
+    { id: 'global-distribution', name: 'Global Distribution', description: 'Adds 1000 cans per second auto production.', baseCost: 10000000, cost: 10000000, cpsIncrease: 1000, count: 0 },
+    { id: 'robot-army', name: 'Robot Army', description: 'Adds 5000 cans per second auto production.', baseCost: 50000000, cost: 50000000, cpsIncrease: 5000, count: 0 }
   ];
 
-  const totalCansDisplay = document.getElementById('total-cans');
-  const cpsDisplay = document.getElementById('cps');
-  const canCountDisplay = document.getElementById('can-count');
-  const redBullCan = document.getElementById('redbull-can');
-  const upgradesList = document.getElementById('upgrades-list');
-  const cpsTextDisplay = document.getElementById('cps-display');
+  let cps = 0;
 
+  const canCountEl = document.getElementById('can-count');
+  const totalCansEl = document.getElementById('total-cans');
+  const redbullCan = document.getElementById('redbull-can');
+  const upgradesList = document.getElementById('upgrades-list');
+  const milestoneSlider = document.getElementById('milestone-slider');
+  const milestonePopup = document.getElementById('milestone-popup');
+  const milestoneMessage = document.getElementById('milestone-message');
+  const milestoneCloseBtn = document.getElementById('milestone-close-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const themeToggleBtn = document.getElementById('theme-toggle');
+
+  // Calculate CPS and click multiplier with support for special upgrades
   function calculateCps() {
     let totalCps = 0;
     let multiplier = 1;
+    let secretRecipeCount = 0;
     upgrades.forEach(upg => {
       if (upg.cpsIncrease) totalCps += upg.cpsIncrease * upg.count;
       if (upg.type === 'clickMultiplier') {
         multiplier *= Math.pow(upg.multiplier, upg.count);
       }
+      if (upg.specialDoubleCps) {
+        secretRecipeCount += upg.count;
+      }
     });
+    // If Secret Recipe purchased, double cps and click multiplier for each count
+    if (secretRecipeCount > 0) {
+      totalCps *= Math.pow(2, secretRecipeCount);
+      multiplier *= Math.pow(2, secretRecipeCount);
+    }
     cps = totalCps;
     cansPerClick = multiplier;
   }
 
-  function updateDisplays() {
-    totalCansDisplay.textContent = formatNumber(Math.round(totalCans));
-    cpsDisplay.textContent = cps.toFixed(2);
-    canCountDisplay.textContent = formatNumber(Math.floor(totalCans));
-    cpsTextDisplay.textContent = `${cps.toFixed(2)} cans per second`;
+  function updateUI() {
+    canCountEl.textContent = totalCans.toLocaleString();
+    totalCansEl.textContent = totalCans.toLocaleString();
 
+    // Update milestone progress
+    if (nextMilestoneIndex < milestones.length) {
+      const currentMilestone = milestones[nextMilestoneIndex];
+      const progress = Math.min(totalCans / currentMilestone, 1);
+      milestoneSlider.style.width = (progress * 100) + '%';
+      milestoneSlider.parentElement.setAttribute('aria-valuenow', Math.floor(progress * 100));
+    } else {
+      milestoneSlider.style.width = '100%';
+      milestoneSlider.parentElement.setAttribute('aria-valuenow', 100);
+    }
+
+    // Update upgrades list
+    upgradesList.innerHTML = '';
     upgrades.forEach(upg => {
-      const upgElem = document.getElementById(`upgrade-${upg.id}`);
-      if (!upgElem) return;
-      if (totalCans >= upg.cost) {
-        upgElem.classList.remove('disabled');
-      } else {
-        upgElem.classList.add('disabled');
-      }
-      const costElem = upgElem.querySelector('.upgrade-cost');
-      costElem.textContent = formatNumber(upg.cost);
-      const countElem = upgElem.querySelector('.upgrade-count');
-      countElem.textContent = `Owned: ${upg.count}`;
-    });
-  }
+      const canAfford = totalCans >= upg.cost;
+      const upgradeDiv = document.createElement('div');
+      upgradeDiv.className = 'upgrade' + (canAfford ? '' : ' disabled');
+      upgradeDiv.setAttribute('role', 'listitem');
+      upgradeDiv.tabIndex = canAfford ? 0 : -1;
+      upgradeDiv.setAttribute('aria-label', `${upg.name}, ${upg.description}, Cost: ${upg.cost.toLocaleString()} cans. Owned: ${upg.count}. ${canAfford ? 'Press Enter to buy.' : 'Not enough cans.'}`);
 
-  function formatNumber(num) {
-    if (num < 1000) return num.toString();
-    if (num < 1e6) return (num / 1000).toFixed(1) + 'K';
-    if (num < 1e9) return (num / 1e6).toFixed(1) + 'M';
-    if (num < 1e12) return (num / 1e9).toFixed(1) + 'B';
-    return num.toExponential(2);
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'upgrade-info';
+
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'upgrade-name';
+      nameDiv.textContent = upg.name;
+      infoDiv.appendChild(nameDiv);
+
+      const descDiv = document.createElement('div');
+      descDiv.className = 'upgrade-desc';
+      descDiv.textContent = upg.description;
+      infoDiv.appendChild(descDiv);
+
+      if (upg.count > 0) {
+        const countDiv = document.createElement('div');
+        countDiv.className = 'upgrade-count';
+        countDiv.textContent = `Owned: ${upg.count}`;
+        infoDiv.appendChild(countDiv);
+      }
+
+      upgradeDiv.appendChild(infoDiv);
+
+      const costDiv = document.createElement('div');
+      costDiv.className = 'upgrade-cost';
+      costDiv.textContent = upg.cost.toLocaleString();
+      upgradeDiv.appendChild(costDiv);
+
+      if (canAfford) {
+        upgradeDiv.addEventListener('click', () => buyUpgrade(upg.id));
+        upgradeDiv.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            buyUpgrade(upg.id);
+          }
+        });
+      }
+
+      upgradesList.appendChild(upgradeDiv);
+    });
   }
 
   function buyUpgrade(id) {
@@ -342,67 +605,171 @@
     if (totalCans >= upg.cost) {
       totalCans -= upg.cost;
       upg.count++;
-      upg.cost = Math.floor(upg.baseCost * Math.pow(1.45, upg.count));
+      upg.cost = Math.floor(upg.baseCost * Math.pow(1.15, upg.count));
       calculateCps();
-      updateDisplays();
+      updateUI();
     }
   }
 
-  redBullCan.addEventListener('click', () => {
-    totalCans += cansPerClick;
-    updateDisplays();
-  });
+  function checkMilestones() {
+    if (nextMilestoneIndex >= milestones.length) return;
+    const milestone = milestones[nextMilestoneIndex];
+    if (totalCans >= milestone) {
+      showMilestonePopup(milestone);
+      nextMilestoneIndex++;
+    }
+  }
 
-  redBullCan.addEventListener('keydown', (e) => {
-    if (e.key === ' ' || e.key === 'Enter') {
+  function showMilestonePopup(milestone) {
+    milestoneMessage.textContent = `Congrats! You reached ${milestone.toLocaleString()} cans!`;
+    milestonePopup.classList.add('show');
+    milestonePopup.focus();
+    triggerConfetti();
+  }
+
+  function closeMilestonePopup() {
+    milestonePopup.classList.remove('show');
+    redbullCan.focus();
+  }
+
+  // Increment cans automatically each second
+  setInterval(() => {
+    totalCans += cps;
+    updateUI();
+    checkMilestones();
+  }, 1000);
+
+  // Click to produce cans
+  redbullCan.addEventListener('click', () => {
+    totalCans += cansPerClick;
+    updateUI();
+    checkMilestones();
+  });
+  redbullCan.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       totalCans += cansPerClick;
-      updateDisplays();
+      updateUI();
+      checkMilestones();
     }
   });
 
-  function createUpgradesUI() {
-    upgradesList.innerHTML = '';
-    upgrades.forEach(upg => {
-      const upgElem = document.createElement('div');
-      upgElem.className = 'upgrade disabled';
-      upgElem.id = `upgrade-${upg.id}`;
-      upgElem.setAttribute('role', 'listitem');
-      upgElem.tabIndex = 0;
-      upgElem.innerHTML = `
-        <div class="upgrade-info">
-          <div class="upgrade-name">${upg.name}</div>
-          <div class="upgrade-desc">${upg.description}</div>
-          <div class="upgrade-count" aria-live="polite" aria-atomic="true">Owned: 0</div>
-        </div>
-        <div class="upgrade-cost">${formatNumber(upg.cost)}</div>
-      `;
-      upgradesList.appendChild(upgElem);
+  milestoneCloseBtn.addEventListener('click', closeMilestonePopup);
+  milestoneCloseBtn.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      closeMilestonePopup();
+    }
+  });
 
-      upgElem.addEventListener('click', () => {
-        if (!upgElem.classList.contains('disabled')) {
-          buyUpgrade(upg.id);
-        }
+  resetBtn.addEventListener('click', () => {
+    if (confirm('Are you sure you want to reset your progress?')) {
+      totalCans = 0;
+      nextMilestoneIndex = 0;
+      upgrades.forEach(u => {
+        u.count = 0;
+        u.cost = u.baseCost;
       });
+      calculateCps();
+      updateUI();
+    }
+  });
 
-      upgElem.addEventListener('keydown', e => {
-        if ((e.key === 'Enter' || e.key === ' ') && !upgElem.classList.contains('disabled')) {
-          e.preventDefault();
-          buyUpgrade(upg.id);
-        }
-      });
-    });
+  // Theme toggle
+  function updateThemeUI() {
+    if (document.body.classList.contains('light')) {
+      themeToggleBtn.textContent = 'Dark Mode';
+      themeToggleBtn.setAttribute('aria-label', 'Switch to dark mode');
+    } else {
+      themeToggleBtn.textContent = 'Light Mode';
+      themeToggleBtn.setAttribute('aria-label', 'Switch to light mode');
+    }
   }
+  themeToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('light');
+    updateThemeUI();
+  });
 
-  function gameLoop() {
-    totalCans += cps / 10;
-    updateDisplays();
-  }
-
-  createUpgradesUI();
+  // Initial calculations and UI update
   calculateCps();
-  updateDisplays();
-  setInterval(gameLoop, 100);
+  updateUI();
+  updateThemeUI();
+
+  // Confetti effect for milestones
+  // Simple confetti animation adapted from canvas-confetti for performance & simplicity
+  const confettiCanvas = document.getElementById('confetti-canvas');
+  const ctx = confettiCanvas.getContext('2d');
+  let confettiPieces = [];
+
+  function resizeCanvas() {
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  class ConfettiPiece {
+    constructor() {
+      this.x = Math.random() * confettiCanvas.width;
+      this.y = Math.random() * -confettiCanvas.height;
+      this.size = (Math.random() * 7) + 7;
+      this.speed = (Math.random() * 3) + 3;
+      this.angle = Math.random() * 2 * Math.PI;
+      this.spin = (Math.random() * 0.1) + 0.05;
+      this.color = `hsl(${Math.floor(Math.random() * 360)}, 100%, 65%)`;
+      this.tilt = Math.random() * 15;
+      this.tiltAngle = 0;
+      this.tiltSpeed = (Math.random() * 0.1) + 0.05;
+    }
+    update() {
+      this.y += this.speed;
+      this.tiltAngle += this.tiltSpeed;
+      this.tilt = Math.sin(this.tiltAngle) * 15;
+      if (this.y > confettiCanvas.height) {
+        this.x = Math.random() * confettiCanvas.width;
+        this.y = -this.size;
+      }
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.lineWidth = this.size / 2;
+      ctx.strokeStyle = this.color;
+      ctx.moveTo(this.x + this.tilt + this.size / 4, this.y);
+      ctx.lineTo(this.x + this.tilt, this.y + this.tilt + this.size / 4);
+      ctx.stroke();
+    }
+  }
+
+  function createConfetti(num) {
+    confettiPieces = [];
+    for (let i = 0; i < num; i++) {
+      confettiPieces.push(new ConfettiPiece());
+    }
+  }
+
+  let confettiRunning = false;
+
+  function runConfetti() {
+    if (!confettiRunning) return;
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    confettiPieces.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    requestAnimationFrame(runConfetti);
+  }
+
+  function triggerConfetti() {
+    if (confettiRunning) return;
+    confettiRunning = true;
+    createConfetti(150);
+    runConfetti();
+    setTimeout(() => {
+      confettiRunning = false;
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }, 5000);
+  }
 </script>
+
 </body>
 </html>
